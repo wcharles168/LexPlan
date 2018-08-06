@@ -55,7 +55,7 @@ channel_list = {'General': []}
 @login_required
 def chat():
     # Get username to display
-    username = db.execute("SELECT username FROM users WHERE id=:userid", {"userid": session["user_id"]}).fetchone()
+    username = db.execute("SELECT username FROM users WHERE id = :userid", userid = session["user_id"])
 
     return render_template("chat.html", channels=channel_list, username=username)
 
@@ -76,12 +76,13 @@ def addChannel():
     # Checks for channel uniqueness
     channelMatch = False
 
-    for channel in list(channel_list):
-        if channel == channel_name:
-            channelMatch = True
+    rows = db.execute("SELECT * FROM channels WHERE name=:channel_name", channel_name = channel_name)
 
-    # Adds channel to dictionary with an empty list of messages for the channel
-    channel_list.update({channel_name:[]})
+    if len(rows) > 0:
+        channelMatch = True
+
+    if channelMatch == False:
+        db.execute("INSERT INTO channels (name) VALUES (:channel_name)", channel_name = channel_name)
 
     return jsonify(channelMatch)
 

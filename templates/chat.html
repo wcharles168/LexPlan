@@ -18,14 +18,12 @@
         </div>
         <div class="main_menu">
             <div class="menu-item">
-                <h5>Display name:</h5><p id="current_name">{{ username }}</p>
-            </div>
-            <div class="menu-item">
-                <form id="new_name">
-                    <h3>What's Your Name?</h3>
-                    <input id="name" type="text" placeholder="Enter display name" autocomplete="off"/>
-                    <button id="submit_name" class="btn btn-primary">Enter</button>
-                </form>
+                <h5>Display name:</h5>
+                <p id="current_name">
+                    {% for user in username %}
+                        {{ user.username }}
+                    {% endfor %}
+                </p>
             </div>
             <div class="menu-item">
                 <form id="new_channel">

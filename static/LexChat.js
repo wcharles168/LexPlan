@@ -120,19 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return (user + " (" + hours + ":" + minutes + ")" + ": " + message);
     }
 
-    // Loads name from local storage
-
-    // If no name on local storage, set to default name
-    if (!localStorage.getItem('name')) {
-
-        localStorage.setItem('name', 'Anonymous');
-
-    }
-
-    // Set display name using value stored in local
-    const name = localStorage.getItem('name');
-    document.querySelector('#current_name').innerHTML = name;
-
     // Grabs all existing channels and displays them
 
     window.onload = () => {
@@ -220,42 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
-    // Changes name on user input
-
-    // By default disables the submit button
-    document.querySelector('#submit_name').disabled = true;
-
-    // Only enables submit button when there is input
-    document.querySelector('#name').onkeyup = () => {
-
-        if (document.querySelector('#name').value.length > 0)
-
-            document.querySelector('#submit_name').disabled = false;
-        else
-
-            document.querySelector('#submit_name').disabled = true;
-
-        document.querySelector('#new_name').onsubmit = () => {
-
-            // Remove any current HTML
-            document.querySelector('#current_name').innerHTML = '';
-
-            const name = document.querySelector('#name').value;
-
-            // Add new element to HTML and local storage
-            document.querySelector('#current_name').innerHTML = name;
-            localStorage.setItem('name', name);
-
-            // Clear input field
-            document.querySelector('#name').value = '';
-
-            // Disable button again after submit
-            document.querySelector('#submit_name').disabled = true;
-
-            return false;
-        };
-    };
 
     // Adds a channel to html and channel list based on user input
 
