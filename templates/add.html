@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Assignments
+{% endblock %}
+
+{% block main %}
+    {% if not classes %}
+        <h3>No classes today! To add a class, go to "Add Class". To add a class schedule, go to "Add Class Schedule".</h3>
+    {% else %}
+        <table style="width: 100%">
+        <tr>
+            <th>Class</th>
+            <th>Time</th>
+            <th></th>
+        </tr>
+        {% for class in classes %}
+            <tr>
+                <td>{{ class.get("class_name") }}</td>
+                <td>{{ class.get("start_time") }} - {{ class.get("end_time") }}</td>
+                <td><button class="btn btn-primary" onclick="getAssignment( '{{class.get("class_name") }}', {{ class.get("class_ID") }}, {{ class.get("default_time") }} ) ">Add Assignment</button></td>
+            </tr>
+        {% endfor %}
+        </table>
+        <div id="assignmentForm" style = display:none>
+            <br>
+            <form action="/addAssignment" method="post" id="assignment">
+                <input autocomplete="off" class="form-control" name="assignment_name" placeholder="Assignment Name" type="text"/>
+                <br>
+                <input autocomplete="off" class="form-control" id="assignment_time" name="assignment_time" placeholder="Assignment Time" type="text"/>
+                <br>
+                <input type="hidden" name="assignment_Class_ID"/>
+                Priority:
+                &nbsp
+                <label class="radio-inline"><input name="priority" value="3" type="radio"/> High</label>
+                &nbsp
+                <label class="radio-inline"><input name="priority" value="2" type="radio"/> Medium</label>
+                &nbsp
+                <label class="radio-inline"><input name="priority" value="1" type="radio" checked/> Low<br></label>
+                <br>
+                 <script>
+                function validate()
+                {
+                    var assignmentTime = document.getElementById("assignment_time");
+                    var isValid = validateInt(assignmentTime);
+                    if (isValid)
+                    {
+                        hideElement( 'assignmentForm' );
+                    }
+                    return isValid;
+                }
+                </script>
+                <button class="btn btn-primary" type="Submit" onclick="return validate();">Submit Assignment</button>
+            </form>
+        </div>
+        <br><br>
+        <b>Existing Assignments: </b><br>
+
+         <table style="width: 100%">
+        <tr>
+            <th>Assignment</th>
+            <th>Duration</th>
+            <th>Priority</th>
+            <th></th>
+        </tr>
+
+        {% for assignment in assignments %} <!--need to pass in list of classes in app.py-->
+            <tr>
+                <td>{{ assignment.get("assignment_name") }}</td>
+                <td>{{ assignment.get("duration") }}</td>
+                <td>{{ assignment.get("assignment_priority") }}</td>
+                 <form action="/addAssignment" method="post">
+                <td><input name="assignment_id" value="{{ assignment.get("assignment_ID") }}" type="hidden">
+                <button class="btn btn-danger" type="submit">Delete</button></td>
+                </form>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
+
+
+{% endblock %}
