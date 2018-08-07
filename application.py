@@ -45,26 +45,22 @@ db = SQL("sqlite:///LexPlan.db")
 
 # CHAT APPLICATION #
 
-# Uniquely identifies each message
-message_id = 0
-
-# list of all channels
-channel_list = {'General': []}
-
 @app.route("/chat", methods=['GET'])
 @login_required
 def chat():
     # Get username to display
-    username = db.execute("SELECT username FROM users WHERE id = :userid", userid = session["user_id"])
+    username = db.execute("SELECT * FROM users WHERE id = :userid", userid = session["user_id"])
 
-    return render_template("chat.html", channels=channel_list, username=username)
+    return render_template("chat.html", username=username)
 
 @app.route("/get_channels", methods=["GET"])
 def get_channel():
     '''Gets channels when window loads'''
 
-    # Returns a list of keys ie. channels
-    return jsonify (list(channel_list))
+    channels = db.execute("SELECT * FROM channels")
+
+    # Returns a list of dictionaries ie. channels
+    return jsonify (channels)
 
 @app.route("/add_channel", methods=["POST"])
 def addChannel():
@@ -80,50 +76,46 @@ def addChannel():
 
     if len(rows) > 0:
         channelMatch = True
+        channel= None
 
     if channelMatch == False:
         db.execute("INSERT INTO channels (name) VALUES (:channel_name)", channel_name = channel_name)
+        channels = db.execute("SELECT * FROM channels WHERE name=:channel_name", channel_name = channel_name)
 
-    return jsonify(channelMatch)
+    return jsonify({"status": channelMatch, "channel": channels})
 
 @app.route("/get_message", methods=["POST"])
 def getMessage():
     '''Retrieves messages'''
 
-    # Gets channel name
+    # Gets channel id
     channel = request.form.get("channel")
 
     # Retrieves messages associated with channel
-    messages = channel_list.get(channel)
+    messages = db.execute("SELECT * FROM messages JOIN channels ON messages.channel_id = channels.id JOIN users ON messages.user_id = users.id \
+                            WHERE channels.id = :channel_id", channel_id = channel)
 
-    return jsonify({ "messages": messages, "channel": channel})
-
+    return jsonify({"messages": messages})
 
 @socketio.on("message sent")
 def message(data):
 
     message_text = data.get("message")
-    channel = data.get("channel")
-    user = data.get("user")
+    channel_id = data.get("channel_id")
+    user_id = data.get("user")
     time = data.get("time")
 
-    # Check for amount of messages in channel is maxed out
-    if (len(channel_list[channel]) > 99):
-        emit("message received", {"message": 'full'}, broadcast=True)
+    # Insert new message into database
+    db.execute("INSERT INTO messages (channel_id, user_id, message, timestamp) VALUES (:channel, :user_id, :message, :time)" \
+                , channel = channel_id, user_id = user_id, message = message_text, time = time)
 
-    # Create a new message object
-    message = {'text': message_text, 'user': user, 'date-time': time, 'id': message_id}
+    # Retrieve username
+    username = db.execute("SELECT username FROM users WHERE id=:userid", userid = user_id)
+    # Retrieve message ID of message just inserted
+    message = db.execute("SELECT id FROM messages WHERE channel_id=:channel AND user_id=:user_id AND message=:message AND timestamp=:time" \
+                        , channel = channel_id, user_id = user_id, message = message_text, time = time)
 
-    # Inserts message to corresponding channel
-    channel_list[channel].append(message)
-
-    emit("message received", {"message": message_text, "channel": channel, "user": user, "time": time, "id": message_id}, broadcast=True)
-
-    increment()
-
-def increment():
-    global message_id
-    message_id += 1
+    emit("message received", {"message": message_text, "channel_id": channel_id, "username": username, "user": user_id, "time": time, "id": message}, broadcast=True)
 
 #   #   #   #   #   #   #
 

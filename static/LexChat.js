@@ -2,14 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Adds a channel to the page
 
-    function addChannelHTML(channel){
+    function addChannelHTML(channel_id, channel_name){
 
         // Create new element for drop-down select list
         const button = document.createElement('option');
-        button.setAttribute("value", channel);
+        button.setAttribute("value", channel_id);
 
         // Add channel name to button
-        button.innerHTML = channel;
+        button.innerHTML = channel_name;
 
         // Add new element to channel list
         document.querySelector('#channels').append(button);
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Retrieves messages on channel select
 
-    function retrieveMessage (channel) {
+    function retrieveMessage (channel_id, channel) {
 
         // Initialize request
         const request = new XMLHttpRequest();
@@ -30,29 +30,32 @@ document.addEventListener('DOMContentLoaded', () => {
             // Clears any messages in chat box
             document.querySelector('#chat-box').innerHTML = '';
 
+            // Display channel name
+            document.querySelector('#current_channel').innerHTML = channel;
+            document.querySelector('#current_channel_id').innerHTML = channel_id;
+
             // Retrieves messages and channel from response
             const data = JSON.parse(request.responseText);
 
             // Loop through messages and display along with user and timestamp
             for (i = 0; i < data.messages.length; i++){
+
                 // Retrieves a single message
                 message = data.messages[i];
 
                 // Gets message attributes
-                user = message["user"];
-                timestamp = message["date-time"];
-                message_text = message["text"];
+                user = message["user_id"];
+                username = message["username"];
+                timestamp = message["timestamp"];
+                message_text = message["message"];
                 id = message["id"];
 
-                addMessage(user, timestamp, message_text, id);
+                addMessage(user, username, timestamp, message_text, id);
             }
-
-            // Display channel name
-            document.querySelector('#current_channel').innerHTML = data.channel;
         };
 
         const data = new FormData();
-        data.append('channel', channel);
+        data.append('channel', channel_id);
 
         request.send(data);
 
@@ -61,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Adds message to message table
 
-    function addMessage(user, timestamp, message_text, id) {
+    function addMessage(user, username, timestamp, message_text, message_id) {
         // Initializes new row to store message
         const row = document.createElement('tr');
         const message_box = document.createElement('p');
@@ -69,14 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const delete_col = document.createElement('td'); // Second column
 
         // Checks if message is associated with current user
-        if (user == document.querySelector('#current_name').innerHTML) {
+        if (user == document.querySelector('#user_id').innerHTML) {
             message_box.setAttribute("class", "your-message");
 
             // Creates a hidden radio button to delete specific message when activated
             const delete_button = document.createElement('input');
             delete_button.setAttribute("class", "delete-select");
             delete_button.setAttribute("type", "radio");
-            delete_button.setAttribute("value", id);
+            delete_button.setAttribute("value", message_id);
             delete_button.setAttribute("hidden", "true");
 
             // Append form to column
@@ -86,8 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else {
             message_box.setAttribute("class", "other-message");
         }
+
         // Formats message
-        message_box.innerHTML = messageFormat(user, timestamp, message_text);
+        message_box.innerHTML = messageFormat(username, timestamp, message_text);
 
         // Appends message to column
         message_col.appendChild(message_box);
@@ -132,23 +136,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (channels != null) {
                 for(i = 0; i < channels.length; i++) {
-                    addChannelHTML(channels[i]);
+                    addChannelHTML(channels[i]["id"], channels[i]["name"]);
                 }
             }
 
             // Checks for locally stored channel
 
+            local_channel_id = localStorage.getItem('channel_id');
             local_channel = localStorage.getItem('channel');
 
             if (!local_channel) {
                 // Displays first channel (general)
-                retrieveMessage(channels[0]);
+                retrieveMessage(channels[0]["id"], channels[0]["name"]);
             }
             else {
                 // Loads channel from local storage
-                retrieveMessage(local_channel);
+                retrieveMessage(local_channel_id, local_channel);
                 // Automatically sets channel as checked
-                document.querySelector('#channels').value = local_channel;
+                document.querySelector('#channels').value = local_channel_id;
             }
         };
 
@@ -179,11 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#new_message').onsubmit = () => {
 
                 message = document.querySelector('#message').value;
-                channel = document.querySelector('#current_channel').innerHTML;
-                user = document.querySelector('#current_name').innerHTML;
+                channel_id = document.querySelector('#current_channel_id').innerHTML;
+                user = document.querySelector('#user_id').innerHTML;
                 time = new Date();
 
-                socket.emit ('message sent', {'message': message, 'channel': channel, 'user': user, 'time': time});
+                socket.emit ('message sent', {'message': message, 'channel_id': channel_id, 'user': user, 'time': time});
 
                 // Clears input field and disables submit button after submission
                 document.querySelector('#message').value = '';
@@ -196,14 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // When message is stored, add it to html
         socket.on('message received', data => {
 
-            // Will not add message if amount of messages in channel is max
-            if (data.message == 'full') {
-                alert("Sorry, channel has exceeded maximum (100) amount of messages");
-            }
-            else {
-                // Only append message if user is on the channel
-                if (document.querySelector('#current_channel').innerHTML == data.channel){
-                    addMessage(data.user, data.time, data.message, data.id);
+            // // Only append message if user is on the channel
+            if (document.querySelector('#current_channel_id').innerHTML == data.channel_id) {
+                for (i = 0; i < data.id.length; i++) {
+                    addMessage(data.user, data.username[i]["username"], data.time, data.message, data.id[i]["id"]);
                 }
             }
         });
@@ -236,8 +237,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 response = JSON.parse(request.responseText);
 
                 // Only adds channel if channel is unique
-                if (response == false) {
-                     addChannelHTML(channel);
+                if (response["status"] == false) {
+                    for (i=0; i < response.channel.length; i++) {
+                        addChannelHTML(response.channel[i]["id"], response.channel[i]["name"]);
+                    }
                 }
                 else {
                     alert("Please enter a unique channel name");
@@ -260,13 +263,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listens for channel selection
 
     document.querySelector('#channels').onchange = () => {
-        // Retrieves channel name from select list
-        var channel = document.querySelector('#channels').value;
 
-        retrieveMessage(channel);
+        input =  document.querySelector('#channels');
+
+        // Retrieves channel name from select list
+        var channel_id = input.value;
+        var channel = input.options[input.selectedIndex].innerHTML;
+
+        retrieveMessage(channel_id, channel);
 
         // Remembers channel that is selected
+        localStorage.setItem('channel_id', channel_id);
         localStorage.setItem('channel', channel);
+
     };
 
     // Deletes message (client side only)
