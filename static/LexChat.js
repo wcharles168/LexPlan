@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 username = message["username"];
                 timestamp = message["timestamp"];
                 message_text = message["message"];
-                id = message["id"];
+                id = message["message_id"];
 
                 addMessage(user, username, timestamp, message_text, id);
             }
@@ -306,24 +306,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelector('#delete-confirm').onclick = () => {
 
+            const request = new XMLHttpRequest();
+            request.open("POST", "/delete_message");
+
             delete_list = document.querySelectorAll('.delete-select');
+
+            // List of message ids to be deleted
+            message_ids = [];
 
             for (i = 0; i < delete_list.length; i ++) {
                 button = delete_list[i];
                 if (button.checked == true) {
                     // Removes parent element of button (row)
                     button.parentElement.parentElement.remove();
+                    // Add message id to list
+                    message_ids.push(button.value);
                 }
             }
 
-            // Restore original settings
-            document.querySelector('#delete-button').disabled = false;
+            request.onload = () => {
+                response = JSON.parse(request.responseText);
 
-            document.querySelectorAll('.delete-select').forEach(function(button) {
-                button.setAttribute('hidden', 'true');
-            });
+                if (response == true) {
+                     // Restore original settings
+                    document.querySelector('#delete-button').disabled = false;
 
-            document.querySelector('.pop-up').setAttribute('hidden', 'true');
+                    document.querySelectorAll('.delete-select').forEach(function(button) {
+                        button.setAttribute('hidden', 'true');
+                    });
+
+                    document.querySelector('.pop-up').setAttribute('hidden', 'true');
+                }
+            };
+            // Add list of messages to request
+            const data = new FormData();
+            data.append("messages", JSON.stringify(message_ids));
+
+            request.send(data);
+            return false;
         };
 
         // If user clicks cancel, also restore original settings

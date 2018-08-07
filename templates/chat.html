@@ -22,9 +22,9 @@
 
                     {% for user in username %}
                     <div id="user_id" hidden>{{ user.id }}</div>
-                    <p id="current_name">{{ user.username }}</p>
+                    <div id="current_name">{{ user.username }}</div>
+                    <a class="nav-link" align="center" href="/logout">Log Out</a></li>
                     {% endfor %}
-
             </div>
             <div class="menu-item">
                 <form id="new_channel">

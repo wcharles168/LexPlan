@@ -5,6 +5,7 @@ import datetime
 import calendar
 import time
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
+import json
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect
 from tempfile import mkdtemp
@@ -97,6 +98,17 @@ def getMessage():
 
     return jsonify({"messages": messages})
 
+@app.route("/delete_message", methods=["POST"])
+def deleteMessage():
+    '''Deletes messages from database'''
+    messages = json.loads(request.form.get("messages"))
+
+    # Loop through message ids
+    for message in messages:
+        db.execute("DELETE FROM messages WHERE message_id=:message_id", message_id = message)
+
+    return jsonify(True)
+
 @socketio.on("message sent")
 def message(data):
 
@@ -112,7 +124,7 @@ def message(data):
     # Retrieve username
     username = db.execute("SELECT username FROM users WHERE id=:userid", userid = user_id)
     # Retrieve message ID of message just inserted
-    message = db.execute("SELECT id FROM messages WHERE channel_id=:channel AND user_id=:user_id AND message=:message AND timestamp=:time" \
+    message = db.execute("SELECT message_id FROM messages WHERE channel_id=:channel AND user_id=:user_id AND message=:message AND timestamp=:time" \
                         , channel = channel_id, user_id = user_id, message = message_text, time = time)
 
     emit("message received", {"message": message_text, "channel_id": channel_id, "username": username, "user": user_id, "time": time, "id": message}, broadcast=True)

@@ -7,6 +7,10 @@ body {
     background-color: #bcc8d6;
 }
 
+.container {
+    position: relative;
+    top: 100px;
+}
 input [type=text]{
     margin: 10px;
 }
