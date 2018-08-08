@@ -77,7 +77,7 @@ def addChannel():
 
     if len(rows) > 0:
         channelMatch = True
-        channel= None
+        channels = None
 
     if channelMatch == False:
         db.execute("INSERT INTO channels (name) VALUES (:channel_name)", channel_name = channel_name)
@@ -106,6 +106,18 @@ def deleteMessage():
     # Loop through message ids
     for message in messages:
         db.execute("DELETE FROM messages WHERE message_id=:message_id", message_id = message)
+
+    return jsonify(True)
+
+@app.route("/delete_channel", methods=["POST"])
+def deleteChannel():
+    '''Deletes channel from database'''
+    channel_id = request.form.get("channel_id")
+
+    # Deletes messages associated with channel
+    db.execute("DELETE FROM messages WHERE channel_id=:channel_id", channel_id = channel_id)
+    # Delete channel
+    db.execute("DELETE FROM channels WHERE id=:channel_id", channel_id = channel_id)
 
     return jsonify(True)
 

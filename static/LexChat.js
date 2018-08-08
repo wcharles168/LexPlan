@@ -32,7 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Display channel name
             document.querySelector('#current_channel').innerHTML = channel;
-            document.querySelector('#current_channel_id').innerHTML = channel_id;
+            document.querySelector('#current_channel_id').setAttribute("value", channel_id);
+
+            // Reveals delete channel button if channel is not the general channel
+            if (document.querySelector('#current_channel').innerHTML != 'General') {
+                document.querySelector('#delete_channel').removeAttribute('hidden');
+            }
+            // If user is requesting General channel, hide delete button
+            else if (document.querySelector('#current_channel').innerHTML == 'General') {
+                document.querySelector('#delete_channel').setAttribute('hidden', true);
+            }
 
             // Retrieves messages and channel from response
             const data = JSON.parse(request.responseText);
@@ -124,9 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return (user + " (" + hours + ":" + minutes + ")" + ": " + message);
     }
 
-    // Grabs all existing channels and displays them
+    window.onload = getChannels();
 
-    window.onload = () => {
+    // Grabs all existing channels and displays them
+    function getChannels() {
         const request = new XMLHttpRequest();
         request.open('GET', '/get_channels');
 
@@ -146,19 +156,19 @@ document.addEventListener('DOMContentLoaded', () => {
             local_channel = localStorage.getItem('channel');
 
             if (!local_channel) {
-                // Displays first channel (general)
+                // Displays first channel
                 retrieveMessage(channels[0]["id"], channels[0]["name"]);
             }
             else {
                 // Loads channel from local storage
                 retrieveMessage(local_channel_id, local_channel);
                 // Automatically sets channel as checked
-                document.querySelector('#channels').value = local_channel_id;
+                document.querySelector('#channels').setAttribute('value', local_channel_id);
             }
         };
 
         request.send();
-    };
+    }
 
     // Sending and receiving messages
 
@@ -184,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#new_message').onsubmit = () => {
 
                 message = document.querySelector('#message').value;
-                channel_id = document.querySelector('#current_channel_id').innerHTML;
+                channel_id = document.querySelector('#current_channel_id').value;
                 user = document.querySelector('#user_id').innerHTML;
                 time = new Date();
 
@@ -202,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.on('message received', data => {
 
             // // Only append message if user is on the channel
-            if (document.querySelector('#current_channel_id').innerHTML == data.channel_id) {
+            if (document.querySelector('#current_channel_id').value == data.channel_id) {
                 for (i = 0; i < data.id.length; i++) {
                     addMessage(data.user, data.username[i]["username"], data.time, data.message, data.id[i]["id"]);
                 }
@@ -278,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
-    // Deletes message (client side only)
+    // Deletes messages
 
     document.querySelector('#delete-button').onclick = () => {
 
@@ -357,6 +367,62 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelector('.pop-up').setAttribute('hidden', 'true');
+        };
+    };
+
+    // Deletes channel
+    document.querySelector('#current_channel_id').onclick = () => {
+        // Retrieves channel id
+        var channel_id = document.querySelector('#current_channel_id').value;
+
+        // Highlights channel
+        document.querySelector('#current_channel').style.color = 'red';
+
+        // Hide delete button and reveals confirm and cancel buttons
+        document.querySelector('#current_channel_id').setAttribute('hidden', true);
+        document.querySelector('#delete_channel').removeAttribute('hidden');
+        document.querySelector('#cancel_channel').removeAttribute('hidden');
+
+        // If user confirms deletion, delete from database and re-get channels
+        document.querySelector('#delete_channel').onclick = () => {
+            const request = new XMLHttpRequest();
+            request.open("POST", "/delete_channel");
+
+            request.onload = () => {
+                response = JSON.parse(request.responseText);
+
+                if (response == true) {
+                    // Restore original settings
+                    document.querySelector('#delete_channel').setAttribute('hidden', true);
+                    document.querySelector('#cancel_channel').setAttribute('hidden', true);
+                    document.querySelector('#current_channel_id').removeAttribute('hidden');
+                    document.querySelector('#current_channel').innerHTML = '';
+                    document.querySelector('#current_channel').style.color = 'black';
+
+                    // Remove channel from local storage
+                    localStorage.removeItem('channel_id');
+                    localStorage.removeItem('channel');
+
+                    // Remove all channel options in channel list
+                    document.querySelector('#channels').options.length = 0;
+
+                    // Get new set of channels
+                    getChannels();
+                }
+            };
+            const data = new FormData();
+            data.append("channel_id", channel_id);
+
+            request.send(data);
+            return false;
+        };
+        // If user clicks cancel, also restore original settings
+        document.querySelector('#cancel_channel').onclick = () => {
+
+            document.querySelector('#delete_channel').setAttribute('hidden', true);
+            document.querySelector('#cancel_channel').setAttribute('hidden', true);
+            document.querySelector('#current_channel_id').removeAttribute('hidden');
+            document.querySelector('#current_channel').style.color = 'black';
         };
     };
 });

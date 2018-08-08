@@ -7,10 +7,10 @@ body {
     background-color: #bcc8d6;
 }
 
-.container {
-    position: relative;
-    top: 100px;
+#current_channel_id, #delete_channel, #cancel_channel {
+    float: right;
 }
+
 input [type=text]{
     margin: 10px;
 }
