@@ -2,7 +2,6 @@ import os
 from cs50 import SQL
 
 import datetime
-import calendar
 import time
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 import json
@@ -46,17 +45,29 @@ db = SQL("sqlite:///LexPlan.db")
 
 # CHAT APPLICATION #
 
-@app.route("/chat", methods=['GET'])
+@app.route("/chat", methods=['GET', 'POST'])
 @login_required
 def chat():
     # Get username to display
     username = db.execute("SELECT * FROM users WHERE id = :userid", userid = session["user_id"])
 
-    return render_template("chat.html", username=username)
+    # User is requesting from to-do page (with specific channel id)
+    if request.method == "POST":
+
+        channel_id = request.form.get("channel_id")
+        channel_name = request.form.get("channel_name")
+
+        return render_template("chat.html", username = username, channel_id = channel_id, channel_name = channel_name)
+
+    else:
+
+        return render_template("chat.html", username = username)
 
 @app.route("/get_channels", methods=["GET"])
 def get_channel():
     '''Gets channels when window loads'''
+
+    # Pre-create channels of the classes a user has
 
     channels = db.execute("SELECT * FROM channels")
 
@@ -148,6 +159,27 @@ def message(data):
 @app.route("/")
 @login_required
 def index():
+    # Get all classes for a user and make them channels if they do not already exist
+    classes = db.execute("SELECT * FROM class_info WHERE user_id=:userID", userID = session["user_id"])
+
+    # Get all current channels
+    channels = db.execute("SELECT * FROM channels")
+
+    channelMatch = False
+
+    # Loop through all channels and classes
+    for course in classes:
+        for channel in channels:
+            # If there is a channel with course name, do not insert into database
+            if course["class_name"] == channel["name"]:
+                channelMatch = True
+
+        # If course name does not match channel name, create a new channel
+        if channelMatch == False:
+            db.execute("INSERT INTO channels (name) VALUES (:channel_name)", channel_name = course["class_name"])
+            channelMatch = False
+        else:
+            channelMatch = False
 
     return redirect("/addAssignment")
 
@@ -301,10 +333,23 @@ def scheduleSet():
 @login_required
 def addAssignment():
     """ Adding assignments """
+
+   # Information used on html side to display existing classes with respective scheduling
+    classSched = db.execute("SELECT start_time, end_time, class_name, class_ID, default_time \
+                            FROM class_schedule JOIN class_info ON class_schedule.class_ID = class_info.ID \
+                            WHERE DoW = :dow AND user_ID = :userid ORDER BY start_Time", \
+                            dow = datetime.datetime.today().strftime('%A'), userid = session["user_id"])
+
+    assignmentList = db.execute("SELECT assignment_name, duration, assignment_priority, assignment_ID \
+                            FROM assignments  \
+                            WHERE date = :date ORDER BY assignment_priority desc, assignment_name", \
+                            date = datetime.datetime.today() )
+
     if request.method == "POST":
 
         # Code for deleting assignments
         if request.form.get("assignment_id"):
+
             db.execute("DELETE FROM assignments WHERE assignment_ID = :assignmentID", assignmentID = request.form.get("assignment_id"))
             return redirect("/addAssignment")
 
@@ -317,36 +362,20 @@ def addAssignment():
                             name = request.form.get("assignment_name"), \
                             date = datetime.datetime.today())
 
-        # Information used on html side to display existing classes with respective scheduling
-        classSched = db.execute("SELECT start_time, end_time, class_name, class_ID, default_time \
-                                FROM class_schedule JOIN class_info ON class_schedule.class_ID = class_info.ID \
-                                WHERE DoW = :dow ORDER BY start_Time AND user_ID = :id", \
-                                dow = calendar.day_name[datetime.datetime.today().weekday()], id = session["user_id"])
-
-        assignmentList = db.execute("SELECT assignment_name, duration, assignment_priority, assignment_ID \
-                                FROM assignments  \
-                                WHERE date = :date ORDER BY assignment_priority desc, assignment_name", \
-                                date = datetime.datetime.today() )
-
         return render_template("add.html", classes = classSched, assignments = assignmentList)
 
     else:
-
-        assignmentList = db.execute("SELECT assignment_name, duration, assignment_priority, assignment_ID \
-                                FROM assignments  \
-                                WHERE date = :date ORDER BY assignment_priority desc, assignment_name", \
-                                date = datetime.datetime.today() )
-
-        classSched = db.execute("SELECT start_time, end_time, class_name, class_ID, default_time \
-                                FROM class_schedule JOIN class_info ON class_schedule.class_ID = class_info.ID \
-                                WHERE DoW = :dow ORDER BY start_Time AND user_ID = :id", \
-                                dow = calendar.day_name[datetime.datetime.today().weekday()], id = session["user_id"])
 
         return render_template("add.html", classes = classSched, assignments = assignmentList)
 
 @app.route("/todo", methods=["GET", "POST"])
 @login_required
 def todoList():
+    # Generates an assignment list to be displayed in todo-list
+    assignmentList = db.execute("SELECT channels.id, channels.name, assignment_name, assignment_ID, duration, assignment_priority, flag \
+                                FROM assignments JOIN class_info ON assignments.class_id=class_info.ID JOIN channels ON class_info.class_name=channels.name \
+                                WHERE date = :date", date = datetime.datetime.today())
+
     if request.method == "POST":
 
         # Get bedtime for user to pass in
@@ -357,11 +386,6 @@ def todoList():
 
         db.execute("UPDATE assignments SET flag = 'True' WHERE assignment_ID = :id", id = request.form.get("assignment_ID"))
 
-        # Generates an assignment list to be displayed in todo-list
-        assignmentList = db.execute("SELECT assignment_name, assignment_ID, duration, assignment_priority, flag \
-                                    FROM assignments WHERE date = :date", \
-                                    date = datetime.datetime.today())
-
         return render_template("todo_list.html", assignments = assignmentList, bedtimeHour = struct_time.tm_hour, bedtimeMin = struct_time.tm_min)
 
     else:
@@ -370,11 +394,6 @@ def todoList():
 
         # Parse bedtime into hr : min
         struct_time = time.strptime(bedtime[0].get("Bedtime"), "%H:%M")
-
-
-        assignmentList = db.execute("SELECT assignment_name, assignment_ID, duration, assignment_priority, flag \
-                                    FROM assignments WHERE date = :date", \
-                                    date = datetime.datetime.today())
 
         return render_template("todo_list.html", assignments = assignmentList, bedtimeHour = struct_time.tm_hour, bedtimeMin = struct_time.tm_min)
 

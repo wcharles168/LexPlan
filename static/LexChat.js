@@ -20,6 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function retrieveMessage (channel_id, channel) {
 
+        channel_list = document.querySelector('#channels');
+        // Loops through all options in channel list
+         for (i = 0; i < channel_list.options.length; i++) {
+            //  If option matches channel, mark that option as selected
+             if (channel_list[i].innerHTML == channel) {
+                 channel_list.selectedIndex = i;
+             }
+         }
+
         // Initialize request
         const request = new XMLHttpRequest();
         request.open("POST", "/get_message");
@@ -36,11 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Reveals delete channel button if channel is not the general channel
             if (document.querySelector('#current_channel').innerHTML != 'General') {
-                document.querySelector('#delete_channel').removeAttribute('hidden');
+                document.querySelector('#current_channel_id').removeAttribute('hidden');
             }
             // If user is requesting General channel, hide delete button
             else if (document.querySelector('#current_channel').innerHTML == 'General') {
-                document.querySelector('#delete_channel').setAttribute('hidden', true);
+                document.querySelector('#current_channel_id').setAttribute('hidden', true);
             }
 
             // Retrieves messages and channel from response
@@ -150,20 +159,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Checks for locally stored channel
+            channel_id = document.querySelector('#requested_channel_id');
+            channel_name = document.querySelector('#requested_channel');
 
-            local_channel_id = localStorage.getItem('channel_id');
-            local_channel = localStorage.getItem('channel');
+            // Check for requested channel
+            if (channel_id.innerHTML && channel_name.innerHTML) {
+                retrieveMessage(channel_id.innerHTML, channel_name.innerHTML);
 
-            if (!local_channel) {
-                // Displays first channel
-                retrieveMessage(channels[0]["id"], channels[0]["name"]);
+                // Clear hidden divs for new channels to be requested
+                channel_id.innerHTML = '';
+                channel_name.innerHTML = '';
             }
             else {
-                // Loads channel from local storage
-                retrieveMessage(local_channel_id, local_channel);
-                // Automatically sets channel as checked
-                document.querySelector('#channels').setAttribute('value', local_channel_id);
+                // Checks for locally stored channel
+                local_channel_id = localStorage.getItem('channel_id');
+                local_channel = localStorage.getItem('channel');
+
+                if (!local_channel) {
+                    // Displays first channel
+                    retrieveMessage(channels[0]["id"], channels[0]["name"]);
+                }
+                else {
+                    // Loads channel from local storage
+                    retrieveMessage(local_channel_id, local_channel);
+                }
             }
         };
 
@@ -191,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // When connected, look for message submissions
         socket.on('connect', () => {
+
             document.querySelector('#new_message').onsubmit = () => {
 
                 message = document.querySelector('#message').value;
@@ -426,4 +446,5 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 });
+
 

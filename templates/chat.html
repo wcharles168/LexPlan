@@ -36,13 +36,15 @@
             <div class="menu-item">
                 <h3>Current Channel:</h3>
             </div>
+            <div id="requested_channel_id" hidden>{{ channel_id }}</div>
+            <div id="requested_channel" hidden>{{ channel_name }}</div>
             <select id="channels">
                <!--To be filled with js-->
             </select>
         </div>
         <div class="chat">
             <div id="channel-name">
-                <button id="current_channel_id" class="btn btn-danger" hidden>Delete Channel</button>
+                <button id="current_channel_id" class="btn btn-danger">Delete Channel</button>
                 <button id="delete_channel" class="btn btn-danger" hidden>Delete</button>
                 <button id="cancel_channel" class="btn btn-info" hidden>Cancel</button>
                 <h4 id="current_channel"><!--To be filled with js--></h4>

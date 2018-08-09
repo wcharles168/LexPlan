@@ -1,3 +1,15 @@
+// Navigate to chat application and specific channel
+function goToChannel(button) {
+    // Gets channel id
+    channel_id = button.value;
+
+    // Redirects to chat application
+    window.location.href = "http://ide50-llei168.cs50.io:8080/chat";
+
+    // Set channel to channel that user specified
+    document.querySelector('#channels').setAttribute('value', channel_id);
+}
+
 function show_Error_Message(message) {
     // Reveal hidden div
     document.querySelector('.error-message').removeAttribute('hidden');
@@ -214,7 +226,7 @@ function getAssignment(className, classID, defaultTime)
     assignmentClassID[0].value = classID;
 
 }
-// Returns remain
+// Returns remaining time for to-do list
 function getRemainingTime(){
 
 	var hour = document.getElementById("bedtimeHour");
@@ -283,4 +295,3 @@ function writeRemainingTime(){
 	}
 
 }
-
