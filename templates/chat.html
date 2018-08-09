@@ -4,6 +4,7 @@
     <head>
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
         crossorigin="anonymous" rel="stylesheet"/>
+        <link href="/static/LexPlanStyles.css" rel="stylesheet"/>
         <link href="/static/LexChatStyles.css" rel="stylesheet"/>
 
         <script src="/static/LexChat.js"></script>
@@ -12,10 +13,18 @@
 
     </head>
     <body>
-        <div id="jumbotron" class="jumbotron shadow">
-            <h1 class="display-4">LexChat</h1>
-            <p class="lead"><a class="nav-link" href="/">A LexPlan application</a></p>
-        </div>
+        <nav class="navbar navbar-expand-md navbar-light bg-light border shadow p-3 mb-5 bg-white rounded">
+            <a class="navbar-brand" href="/chat">LexChat</a>
+            <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav ml-auto mt-2">
+                    <li class="nav-item"><a class="nav-link" id="chuck_norris">Chuck Norris It</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                </ul>
+            </div>
+        </nav>
         <div class="main_menu">
             <div class="menu-item">
                 <h5>Display name:</h5>

@@ -445,6 +445,28 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#current_channel').style.color = 'black';
         };
     };
+
+    // Chuck Norris functionality
+    document.querySelector('#chuck_norris').onclick = () => {
+        document.querySelectorAll('.your-message').forEach(function(element) {
+
+            // Remove that saucy inner HTML
+            element.innerHTML = '';
+
+            // Initialize request for a really funny Chuck Norris joke
+            const request = new XMLHttpRequest();
+            request.open("GET", "/chuck_norris");
+
+            request.onload = () => {
+                response = JSON.parse(request.responseText);
+
+                // Replace element html with a joke
+                element.innerHTML = response["value"];
+            };
+
+            request.send();
+        });
+    };
 });
 
 

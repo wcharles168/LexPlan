@@ -4,6 +4,7 @@ from cs50 import SQL
 import datetime
 import time
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
+import requests
 import json
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect
@@ -131,6 +132,14 @@ def deleteChannel():
     db.execute("DELETE FROM channels WHERE id=:channel_id", channel_id = channel_id)
 
     return jsonify(True)
+
+@app.route("/chuck_norris", methods=["GET"])
+def chuckNorris():
+    '''Gets a Chuck Norris joke'''
+
+    response = requests.get("https://api.chucknorris.io/jokes/random?category=dev")
+
+    return jsonify(response.json())
 
 @socketio.on("message sent")
 def message(data):

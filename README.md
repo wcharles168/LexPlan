@@ -23,6 +23,12 @@ Finally is the todo list page, where the list of assignments for each day will b
 as completed. Additionally, the program will display the time that the user should be expected to start their assignments, given their inputed bedtime.
 At the end of each day, the todo list is cleared for the next day.
 
+Everything above is what I completed for my final project in CS50. For the current final project, I added a chat application, LexChat, to Lexplan.
+
+All messages and channels are stored in the same LexPlan database, and the user's channels are pre-created for each class that a user has. Also, on the
+to-do page, each assignment allows the user to "chat", which directs them to the specific channel that corresponds with an assignment.
+
 And that's it! The purpose of the application is so that each day the user will be able to log in and input assignments for classes that he/she
-will have (hopefully!) entered and scheduled beforehand
+will have (hopefully!) entered and scheduled beforehand. The purpose of the chat application is for any questions that a user might have for a certain
+assignment that his or her peers that have the same class may be able to help with.
 

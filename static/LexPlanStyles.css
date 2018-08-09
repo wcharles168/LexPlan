@@ -27,3 +27,20 @@ main img
     /* constrain images on small screens */
     max-width: 100%;
 }
+
+body {
+    position: relative;
+}
+
+#jumbotron {
+    margin-bottom: 17px ;
+    background-color: #bcc8d6;
+}
+
+#current_channel_id, #delete_channel, #cancel_channel {
+    float: right;
+}
+
+input [type=text]{
+    margin: 10px;
+}
