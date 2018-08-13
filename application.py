@@ -349,11 +349,6 @@ def addAssignment():
                             WHERE DoW = :dow AND user_ID = :userid ORDER BY start_Time", \
                             dow = datetime.datetime.today().strftime('%A'), userid = session["user_id"])
 
-    assignmentList = db.execute("SELECT assignment_name, duration, assignment_priority, assignment_ID \
-                            FROM assignments  \
-                            WHERE date = :date ORDER BY assignment_priority desc, assignment_name", \
-                            date = datetime.datetime.today() )
-
     if request.method == "POST":
 
         # Code for deleting assignments
@@ -371,9 +366,20 @@ def addAssignment():
                             name = request.form.get("assignment_name"), \
                             date = datetime.datetime.today())
 
+        assignmentList = db.execute("SELECT assignment_name, duration, assignment_priority, assignment_ID \
+                                FROM assignments  \
+                                WHERE date = :date ORDER BY assignment_priority desc, assignment_name", \
+                                date = datetime.datetime.today() )
+
         return render_template("add.html", classes = classSched, assignments = assignmentList)
 
     else:
+
+
+        assignmentList = db.execute("SELECT assignment_name, duration, assignment_priority, assignment_ID \
+                                FROM assignments  \
+                                WHERE date = :date ORDER BY assignment_priority desc, assignment_name", \
+                                date = datetime.datetime.today() )
 
         return render_template("add.html", classes = classSched, assignments = assignmentList)
 
