@@ -3,7 +3,7 @@ from cs50 import SQL
 
 import datetime
 import time
-from flask import Flask, flash, redirect, render_template, request, session, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, jsonify, send_from_directory
 import requests
 import json
 from flask_session import Session
@@ -43,6 +43,18 @@ Session(app)
 
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///LexPlan.db")
+
+
+@app.route("/resume/<path:filename>", methods=['GET'])
+def resume(filename):
+    '''Main page for charleswang.info'''
+
+    return send_from_directory("resume", filename)
+
+@app.route("/", methods=['GET'])
+def mainpage():
+
+    return redirect("/resume/index.html")
 
 # CHAT APPLICATION #
 
@@ -165,7 +177,7 @@ def message(data):
 
 # PLANNER APPLICATION #
 
-@app.route("/")
+@app.route("/index")
 @login_required
 def index():
     # Get all classes for a user and make them channels if they do not already exist
@@ -211,7 +223,7 @@ def login():
         session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/index")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -248,7 +260,7 @@ def register():
 
         session["user_id"] = rows[0]["id"]
 
-        return redirect("/")
+        return redirect("/index")
 
     else:
         return render_template("register.html")
