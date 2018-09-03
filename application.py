@@ -432,4 +432,4 @@ def logout():
     session.clear()
 
     # Redirect user to login form
-    return redirect("/")
+    return redirect("/index")
