@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register Class Information
+{% endblock %}
+
+{% block main %}
+
+    <form id="create_class" action="/classSet" method="post">
+
+        <div class="form-group">
+             <input autocomplete="off" autofocus class="form-control" id="class_name" name="class_name" placeholder="Class name" type="text"/>
+        </div>
+         <div class="form-group">
+             <input autocomplete="off" autofocus class="form-control" id="default_time" name="default_time" placeholder="Assignment time mins" type="text" onkeyup = "blackText(this);"/>
+         </div>
+         <button onclick="validateForm(this); return false;" id="class_form" class="btn btn-primary" type="submit">Submit</button>
+         <div class="error-message"></div>
+    </form>
+    <br>
+     Classes Already Submitted: <br>
+     <table style="width: 100%">
+         <tr>
+            <th></th>
+            <th></th>
+        </tr>
+
+        {% for class in classes %}
+        <tr>
+            <form action="/classSet" method="post">
+            <td>{{ class.get("class_name") }} </td>
+            <td><input name="class_id" value="{{ class.get("ID") }}" type="hidden">
+            <button class="btn btn-danger" type="submit">Delete</button></td>
+            </form>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+{% endblock %}

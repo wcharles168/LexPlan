@@ -1,0 +1,87 @@
+<! DOCTYPE html>
+
+<html>
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+        crossorigin="anonymous" rel="stylesheet"/>
+        <link href="/static/LexPlanStyles.css" rel="stylesheet"/>
+        <link href="/static/LexChatStyles.css" rel="stylesheet"/>
+
+        <script src="/static/LexChat.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <title>LexChat</title>
+
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-md navbar-light bg-light border shadow p-3 mb-5 bg-white rounded">
+            <a class="navbar-brand" href="/chat">LexChat</a>
+            <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav ml-auto mt-2">
+                    <li class="nav-item"><a class="nav-link" id="chuck_norris">Chuck Norris It</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="main_menu">
+            <div class="menu-item">
+                <h5>Display name:</h5>
+
+                    {% for user in username %}
+                    <div id="user_id" hidden>{{ user.id }}</div>
+                    <div id="current_name">{{ user.username }}</div>
+                    <a class="nav-link" align="center" href="/logout">Log Out</a></li>
+                    {% endfor %}
+            </div>
+            <div class="menu-item">
+                <form id="new_channel">
+                    <h3>Add a Channel</h3>
+                    <input id="channel" name="channel" type="text" placeholder="Channel Name" autocomplete="off"/>
+                    <button id="submit_channel" class="btn btn-primary">Add</button>
+                </form>
+            </div>
+            <div class="menu-item">
+                <h3>Current Channel:</h3>
+            </div>
+            <div id="requested_channel_id" hidden>{{ channel_id }}</div>
+            <div id="requested_channel" hidden>{{ channel_name }}</div>
+            <select id="channels">
+               <!--To be filled with js-->
+            </select>
+        </div>
+        <div class="chat">
+            <div id="channel-name">
+                <button id="current_channel_id" class="btn btn-danger">Delete Channel</button>
+                <button id="delete_channel" class="btn btn-danger" hidden>Delete</button>
+                <button id="cancel_channel" class="btn btn-info" hidden>Cancel</button>
+                <h4 id="current_channel"><!--To be filled with js--></h4>
+            </div>
+            <div class="message-display">
+                <table id="chat-box" style="width: 100%">
+                <!--Additional rows (messages) filled with js-->
+                </table>
+            </div>
+            <div class="input-bar">
+                <div class="input-bar-item" id="input_field">
+                    <form id="new_message">
+                        <div class="form-group">
+                            <input class="form-control" id="message" type="text" placeholder="Type message here" autocomplete="off"/>
+                        </div>
+                        <div class="input-bar-item input-bar-item-btn">
+                            <button id="submit_message" class="btn btn-info">Enter</button>
+                        </div>
+                    </form>
+                    <form id="delete-form" align="center">
+                        <button id="delete-button" class="btn btn-danger">Delete Messages</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+         <div class="pop-up" hidden>
+            <button id="delete-confirm" class="btn btn-danger">Delete</button>
+            <button id="cancel" class="btn btn-info">Cancel</button>
+        </div>
+    </body>
+</html>

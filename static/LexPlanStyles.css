@@ -1,0 +1,46 @@
+nav .navbar-brand
+{
+    /* size for brand */
+    font-size: xx-large;
+}
+
+main .form-control
+{
+    /* center form controls */
+    display: inline-block;
+
+    /* override Bootstrap's 100% width for form controls */
+    width: auto;
+}
+
+main
+{
+    /* scroll horizontally as needed */
+    overflow-x: auto;
+
+    /* center contents */
+    text-align: center;
+}
+
+main img
+{
+    /* constrain images on small screens */
+    max-width: 100%;
+}
+
+body {
+    position: relative;
+}
+
+#jumbotron {
+    margin-bottom: 17px ;
+    background-color: #bcc8d6;
+}
+
+#current_channel_id, #delete_channel, #cancel_channel {
+    float: right;
+}
+
+input [type=text]{
+    margin: 10px;
+}
