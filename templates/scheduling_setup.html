@@ -14,7 +14,7 @@
             <td>End Time</td>
         </tr>
 
-        <tr>
+        <tr id="scheduling-row">
             <td><div class="form-group">
             <select id="class" name="class">
                 {% for class in classes %} <!--pass in list called classes-->
@@ -55,7 +55,7 @@
         checkOverlap(start_time.value, end_time.value, current_class.options[current_class.selectedIndex].innerHTML, document.querySelector('#DoW').value);
     }
     </script>
-        <button onclick="return validate(); return false;" class="btn btn-primary" type="submit">Submit</button>
+    <button onclick="return validate(); return false;" class="btn btn-primary" type="submit">Submit</button>
 
     </form>
     <br>

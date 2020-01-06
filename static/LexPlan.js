@@ -295,3 +295,5 @@ function writeRemainingTime(){
 	}
 
 }
+
+// Adds an additional form for time

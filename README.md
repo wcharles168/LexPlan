@@ -32,3 +32,8 @@ And that's it! The purpose of the application is so that each day the user will 
 will have (hopefully!) entered and scheduled beforehand. The purpose of the chat application is for any questions that a user might have for a certain
 assignment that his or her peers that have the same class may be able to help with.
 
+
+How to run batch file on machine:
+Start > startflask.cmd
+
+

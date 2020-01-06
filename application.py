@@ -3,7 +3,7 @@ from cs50 import SQL
 
 import datetime
 import time
-from flask import Flask, flash, redirect, render_template, request, session, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, jsonify, send_from_directory
 import requests
 import json
 from flask_session import Session
@@ -42,9 +42,19 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///phpliteadmin/LexPlan.db")
-# print(db)
+db = SQL("sqlite:///LexPlan.db")
 
+
+@app.route("/resume/<path:filename>", methods=['GET'])
+def resume(filename):
+    '''Main page for charleswang.info'''
+
+    return send_from_directory("resume", filename)
+
+@app.route("/", methods=['GET'])
+def mainpage():
+
+    return redirect("/resume/index.html")
 
 # CHAT APPLICATION #
 
@@ -167,7 +177,7 @@ def message(data):
 
 # PLANNER APPLICATION #
 
-@app.route("/")
+@app.route("/index")
 @login_required
 def index():
     # Get all classes for a user and make them channels if they do not already exist
@@ -213,7 +223,7 @@ def login():
         session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/index")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -250,7 +260,7 @@ def register():
 
         session["user_id"] = rows[0]["id"]
 
-        return redirect("/")
+        return redirect("/index")
 
     else:
         return render_template("register.html")
@@ -388,8 +398,6 @@ def addAssignment():
 @app.route("/todo", methods=["GET", "POST"])
 @login_required
 def todoList():
-
-    print(str(datetime.datetime.today()) + " before processed")
     # Generates an assignment list to be displayed in todo-list
     assignmentList = db.execute("SELECT channels.id, channels.name, assignment_name, assignment_ID, duration, assignment_priority, flag \
                                 FROM assignments JOIN class_info ON assignments.class_id=class_info.ID JOIN channels ON class_info.class_name=channels.name \
@@ -424,7 +432,4 @@ def logout():
     session.clear()
 
     # Redirect user to login form
-    return redirect("/")
-
-if __name__ == "__main__":
-    app.run()
+    return redirect("/index")
